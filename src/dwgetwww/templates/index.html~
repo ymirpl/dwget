@@ -1,0 +1,7 @@
+{% for log in logs %}
+
+{{log.0.0}}:{{log.0.1}} </br></br>
+
+{{log.1}}
+
+{% endfor %} 

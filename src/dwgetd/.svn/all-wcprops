@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 29
+/dwget/!svn/ver/89/src/dwgetd
+END
+Slave.py
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/dwget/!svn/ver/89/src/dwgetd/Slave.py
+END
+threads.py
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/dwget/!svn/ver/65/src/dwgetd/threads.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/dwget/!svn/ver/2/src/dwgetd/__init__.py
+END
+Task.py
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/dwget/!svn/ver/89/src/dwgetd/Task.py
+END

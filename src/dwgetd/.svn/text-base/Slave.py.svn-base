@@ -1,0 +1,105 @@
+from pydispatch import dispatcher
+from dwgetd.threads import *
+from xml.etree import ElementTree as ET
+
+
+class Slave(object):
+    '''
+    classdocs
+    '''
+    ip = ''
+    url = ''
+    chunk = () # tuple containing length and offset (-1 for max length)
+    status = 0
+    received = 0 
+    avgSpeed = 0
+    currentSpeed = 0
+    rating = 0.0 # rating based on reports 
+    slaveTalk = None
+    
+    
+    def __init__(self, ip):
+        self.ip = ip
+        dispatcher.send('DEBUG', 'slaveObject', '__init__')
+        
+        
+        
+    def updateReport(self):
+        
+        orderElement = ET.Element("Order")
+        orderElement.attrib["type"] = "sendReport"
+        xmlFile = ET.tostring(orderElement, 'utf-8')
+        dispatcher.send('DEBUG', 'slaveObject', xmlFile)
+        
+        
+        self.slaveTalk = SlaveThread(self.ip)
+        self.slaveTalk.data = xmlFile
+        self.slaveTalk.start()
+        print self.slaveTalk.receivedData
+        
+        # parse report sent by slave here into slave class variables
+        report = ET.XML(self.slaveTalk.receivedData)
+        root = report.getroot()
+        for sub in root.items():
+            if sub.tag == 'status':
+                self.status = int(sub.text)
+            elif sub.tag == 'received':
+                self.received = int(sub.text)
+            elif sub.tag == 'avgSpeed':
+                self.avgSpeed = int(sub.text)
+            elif sub.tag == 'currentSpeed':
+                self.currentSpeed = int(sub.text)
+            
+            
+    '''
+    Param: chunk[lenght, start], server w/o resume, set file length to -1 
+    
+    '''
+    def start(self, chunk, url):
+    
+        
+        self.chunk = chunk
+        self.url = url
+        
+        # generate proper xml file 
+        
+        orderElement = ET.Element("order")
+        orderElement.attrib["type"] = "start"
+        urlElement = ET.SubElement(orderElement, "url")
+        
+        sizeElement = ET.SubElement(orderElement, 'length').text = repr(chunk[0])
+        startElement = ET.SubElement(orderElement, 'start').text = repr(chunk[1])
+        
+        urlElement.text = (self.url)
+           
+        xmlFile = ET.tostring(orderElement, 'utf-8')
+        dispatcher.send('DEBUG', 'slaveObject', xmlFile)
+
+        
+        
+        
+        self.slaveTalk = SlaveThread(self.ip)
+        self.slaveTalk.data = "%s%s" % (xmlFile,'\n')
+        self.slaveTalk.start()
+        
+   
+    def stop(self):
+        orderElement = ET.Element("Order")
+        orderElement.attrib["type"] = "stop"
+        xmlFile = ET.tostring(orderElement, 'utf-8')
+        dispatcher.send('DEBUG', 'slaveObject', xmlFile)
+        
+        
+        self.slaveTalk = SlaveThread(self.ip)
+        self.slaveTalk.data = xmlFile
+        self.slaveTalk.run()
+        
+        
+    
+    def getStatus(self):
+        return status
+        
+        
+    
+        
+        

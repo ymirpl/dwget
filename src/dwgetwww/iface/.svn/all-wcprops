@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/dwget/!svn/ver/208/src/dwgetwww/iface
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/dwget/!svn/ver/103/src/dwgetwww/iface/__init__.py
+END
+consts.py
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/dwget/!svn/ver/173/src/dwgetwww/iface/consts.py
+END
+views.py
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/dwget/!svn/ver/208/src/dwgetwww/iface/views.py
+END
+models.py
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/dwget/!svn/ver/103/src/dwgetwww/iface/models.py
+END

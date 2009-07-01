@@ -1,0 +1,73 @@
+# coding=utf8
+from pydispatch import dispatcher
+
+import sys
+from time import gmtime, strftime
+from xml.etree import ElementTree as ET
+from xml.etree.ElementTree import *
+from socket import * 
+from threading import Thread 
+
+class LoggerThread(Thread): 
+    sock = None
+    logger = None 
+    port = 2000
+
+    def initSocket(self): 
+        self.sock = socket(AF_INET, SOCK_STREAM) 
+        self.sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, True)  
+        self.sock.bind(('', self.port)) 
+        self.sock.listen(5)
+        
+    def waitForConnection(self): 
+        self.client, self.address = self.sock.accept() 
+        
+    def __init__(self, logger, port): 
+        Thread.__init__(self) 
+        self.port = port
+        self.logger = logger
+    
+    def run(self): 
+        self.initSocket()
+        while True :             
+            self.waitForConnection()
+            
+            msg = ET.tostring(self.logger.generateXML())
+            sent = 0
+            while sent < len(msg) : 
+                sent += self.client.send(msg[sent:])            
+
+            self.client.close() 
+        self.sock.close()
+
+class Logger():
+    ___signal = []
+    ___sender = []
+    ___arg = []
+    ___time = []
+    __name = ''
+    def __init__( self, name = "set_log_name", port=2000):
+        self.__name = name
+        LoggerThread(self, port).start()
+        dispatcher.connect(self.__log, signal = dispatcher.Any, sender = dispatcher.Any)
+    def __log(self, arg, signal, sender): 
+        self.___signal.append(repr(signal))
+        self.___sender.append(repr(sender))
+        self.___arg.append(repr(arg))
+        self.___time.append(strftime("%a, %d %b %Y %H:%M:%S", gmtime()))
+        print strftime("%a, %d %b %Y %H:%M:%S", gmtime()) + u' Logged: '+ repr(signal) + repr(sender) + repr(arg)
+        
+    def generateXML(self):
+        doc = Element("Log")
+        
+        for i in xrange(len(self.___signal)):
+            SubElement(doc, u'Entry%d' % (i), id=u'%d'%(i), signal=self.___signal[i], sender=self.___sender[i], time=self.___time[i]).text = self.___arg[i]        
+        
+        return doc
+        
+    def writeLogFile(self):
+        try:
+            ElementTree(self.generateXML()).write("%s.xml" % (self.__name))
+        except:
+            print "[FATAL]: Cannot write the log file."
+            print sys.exc_info()

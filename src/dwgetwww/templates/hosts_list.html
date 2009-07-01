@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+
+<title>Distributed wget </title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/site_media/admin.css" type="text/css" media="screen,projection">
+
+</head>
+
+
+
+<body><div id="wrapper">
+<div id="innerwrapper">
+	<div id="header">
+	<h2>Distributed wget</h2>
+	<ul id="nav">
+				<li><a href="/">Zadania</a></li>
+						<li><a href="/manage/list" >Zarządzaj węzłami</a></li>
+	</ul>
+		</div>
+			<div id="content">
+<h2>Obserwowane stacje robocze</h2>
+
+
+<ul>
+{% for host in hosts %}
+
+<li>{{host.0}}:{{host.1}} <a href="/manage/list/remove/{{host.0}}/{{host.1}}"><img src="/site_media/delete.png "/></a></a></li>
+
+{% endfor %} 
+
+
+</ul>
+<form action="/manage/list/add" method="post">
+<input type="text" name="ip" />
+:
+<input type="text" name="port" size="4"/>
+<input type="submit" name="add" value="Add" />
+</form>
+
+
+
+
+</div>
+<div id="footer">
+<p>dwget CC BY-NC Paweł Jastrzębski, Tomasz Kopczuk, Marcin Mincer, Łukasz Tylicki</p>
+</div>
+
+</div></div></body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

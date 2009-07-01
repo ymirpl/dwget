@@ -1,0 +1,94 @@
+'''
+Created on 2009-05-02
+
+@author: ltylicki
+'''
+
+from pydispatch import dispatcher 
+
+from socket import * 
+from threading import Thread 
+from common.Logger import Logger
+from common.consts import * 
+from xml.etree import * 
+
+class talkerThread(Thread): 
+    sock = None 
+    client = None 
+    address = None 
+    msg = ''
+    
+    slaveManager = None 
+    
+    requestType = None 
+    url = None 
+    begining = -1 
+    length = -1 
+
+    def initSocket(self): 
+        self.sock = socket(AF_INET, SOCK_STREAM) 
+        self.sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, True)  
+        self.sock.bind(('', 6678)) 
+        self.sock.listen(5)
+        
+    def waitForMaster(self): 
+        self.client, self.address = self.sock.accept() 
+        dispatcher.send('DEBUG', 'talkerThread', 'Master has connected...') 
+        
+    def __init__(self, slaveManager): 
+            Thread.__init__(self) 
+            self.slaveManager = slaveManager 
+    
+    def parseMasterRequest(self, data):  
+        print "RECEIVED: ", data 
+        print '\n' 
+        
+        xmlMessage = ElementTree.XML(data) 
+        requestType = xmlMessage.get("type") 
+        if requestType == 'start' : 
+            url = xmlMessage.find("url").text 
+            length = int(xmlMessage.find("length").text) 
+            begining = int(xmlMessage.find("start").text) 
+            #print "Ten chuj kazal sciagnac " + length + " bajtow, zaczynajac od " + begining + " z " + url 
+            dispatcher.send('DEBUG', 'talkerThread', 'Master has requested a file download...') 
+            dispatcher.send('MASTER_REQUEST', self, (NEW_URI, url, begining, length)) 
+        elif requestType == 'upload': 
+            dispatcher.send('DEBUG', 'talkerThread', 'Master has requested a download report...')
+            self.sendFileToMaster(self.fileManager.getFile()) 
+        elif requestType == 'abort': 
+            dispatcher.send('DEBUG', 'talkerThread', 'Master has requested an abortion of file downloading...') 
+            dispatcher.send('MASTER_REQUEST', self, (ABORT,))
+        elif requestType == 'report': 
+            dispatcher.send('DEBUG', 'talkerThread', 'Master has requested a download report...')
+            self.sendFileToMaster(self.slaveManager.getReport()) 
+        elif requestType == 'kill': 
+            dispatcher.send('DEBUG', 'talkerThread', 'Master has requested killing a daemon...')          
+            dispatcher.send('MASTER_REQUEST', self, (KILL,)) 
+        else : 
+            dispatcher.send('DEBUG', 'talkerThread', 'Master has requested an unknown operation...')  
+    
+    def sendFileToMaster(self, file): 
+        if file == None: 
+            dispatcher.send('DEBUG', 'talkerThread', 'Master has requested an incomplete part of file...')
+        else :
+            sent = 0 
+            while sent < len(file): 
+                sent += self.client.send(file[sent:]) 
+            dispatcher.send('DEBUG', 'talkerThread', 'Sent master an complete part of file...')
+    
+    def run(self): 
+        self.initSocket()
+        while True :             
+            self.waitForMaster()
+            self.msg = '' 
+            while True :             
+                data = self.client.recv(512)
+                self.msg = self.msg + data
+                
+                if data[-1] == '\n': break
+            
+            self.parseMasterRequest(self.msg)
+            self.client.send('TWOJA STARA ZASIEWA POLA WEKTOROWE\n') 
+            self.client.close() 
+        self.sock.close()
+         

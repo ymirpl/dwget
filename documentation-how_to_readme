@@ -1,0 +1,14 @@
+Instrukcja obsługi -- pydoc --
+
+W celu obejrzenia dokumentacji technicznej projektu wget musimy uruchomić serwer dokumentacji "pydoc".
+
+Przechodzimy do katalogu /wget/src/ po czym wpisujemy polecenie "pydoc -g".
+
+W nowo otwartym okienku wybieramy "open browser".
+
+W przeglądarce widzimy kompletną dokumentację pakietów języka python w tym dokumentacje projektu wget.
+Jest ona prezentowana jako dokumentacja plików znajdujących się w bierzącym katalogu, dla którego
+uruchomione zostało polecenie "pydoc -g" - część oznaczona "."
+
+UWAGA - występują problemy z przeglądarką FireFox.
+UWAGA 2 - należy zwrócić uwagę czy przeglądarka jest w trybie online.

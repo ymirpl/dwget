@@ -1,0 +1,12 @@
+{% for host in hosts %}
+
+{{host.0}}:{{host.1}} <a href="/manage/list/remove/{{host.0}}/{{host.1}}">DELETE</a><br/>
+
+{% endfor %} 
+
+<form action="/manage/list/add" method="post" enctype="text/plain">
+<input type="text" name="ip" />
+:
+<input type="text" name="port" size="4"/>
+<input type="submit" name="add" value="Add" />
+</form>

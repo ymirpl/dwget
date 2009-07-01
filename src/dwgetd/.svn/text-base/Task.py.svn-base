@@ -1,0 +1,85 @@
+from pydispatch import dispatcher
+from dwgetd.threads import *
+import socket
+
+'''
+Created on 2009-05-20
+
+@author: ymir
+'''
+
+class Task(object):
+    '''
+    classdocs
+    '''
+    
+    url = ''
+    size = 0
+    supportsResume = True
+
+
+    def __init__(self, url):
+        '''
+        Constructor
+        '''
+        self.url = url
+        self.checkHttpServer()
+        
+         
+    def checkHttpServer(self):
+        '''
+        Checking whether server supports resume
+        '''
+        
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+        sock.settimeout(3)
+        if sock : 
+            dispatcher.send('DEBUG', 'TaskClass', 'Socket creation succeded...') 
+        else :
+            dispatcher.send('ERROR', 'TaskClass', 'Socket creation failed...')  
+        
+        protocol = self.url[:self.url.find(':')]
+        if protocol == 'http' : 
+            port = 80               
+        else : 
+            dispatcher.send('ERROR', 'TaskClass', 'Unkown protocol...')
+            dispatcher.send('STATE_CHANGE', self, (FAILED, UNKNOWN_PROTOCOL))
+            return
+        host = self.url[self.url.find('//') + 2 : ] 
+        file = host[host.find('/') : ]
+        host = host[ : host.find('/')]
+               
+        message = u'GET %s HTTP/1.1\r\nHost: %s:%d\r\nRange:bytes=%d-%d\r\n\r\n' % (file, host, port, 0, 1024)
+        sock.connect((host, port))
+        sent = 0
+        while sent < len(message):
+            sent += sock.send(message[sent:])
+        
+               
+        httpCode = ''
+        while True:
+            data = sock.recv(512)
+            httpCode = httpCode + data
+            if len(httpCode) > 21: break
+            
+            
+       # TODO NEED TO GET FILE LENGHT FORM HEADERS!
+        self.size = 65444
+            
+            
+        if not cmp(httpCode[9:13],'206'):           # clue of this too long method
+            self.supportsResume = False
+            dispatcher.send('DEBUG', 'TaskClass', 'Server not supporting resume') 
+            
+        sock.close()
+        
+    def start(self):
+        '''
+        starting task procedure
+        '''
+        if not self.supportsResume:
+            # we can use only one slave to download, couse no resume available
+            slaveList.sort()
+            
+            
+        

@@ -1,0 +1,117 @@
+# coding=utf8
+from pydispatch import dispatcher
+from threading import Thread
+import socket 
+import os, os.path
+
+
+class MainThread(Thread):
+    '''
+    Tu bedzie komentarz
+    '''    
+    socketFileName = 'stefan' # nazwa pliku w tempie
+    msg = u''
+  
+  
+    # TODO lapac wyjatki o socketow
+    def setupSocket(self):
+        if os.path.exists("/tmp/"+self.socketFileName): os.remove("/tmp/"+self.socketFileName)
+        
+        self.server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) # tutaj bedziemy sluchac na polecenia od konsoli
+        
+        if not self.server:
+            dispatcher.send('ERROR', 'masterMainThread', 'Can\'t open UNIX socket in /tmp')
+
+        self.server.bind("/tmp/"+self.socketFileName)
+                
+        self.server.listen(1)
+                    
+    def __init__ (self):
+        Thread.__init__(self)
+        dispatcher.send('DEBUG', 'masterMainThread', '__init__')
+        self.setupSocket()
+        self.daemon = True
+        
+        
+           
+    def run(self):
+        
+        while True:
+            connection, address = self.server.accept()     
+            while True: 
+                data = connection.recv(1024) 
+                self.msg = self.msg + data
+                
+                if data and data[-1] == '\n': break 
+               
+            self.msg = self.msg.strip();
+            
+
+            [command, arg] = self.msg.split(' ')
+            dispatcher.send(command, 'masterMainThread', arg)
+            # DEBUG
+            #dispatcher.send('REPLY_SOCKET', 'masterMainThread', connection)
+            self.msg = ''
+
+    def __del__(self):
+        self.server.close()
+        
+class SlaveThread(Thread):
+    '''
+    class comment
+    '''
+    
+    ip = '' 
+    sock = None
+    data = None
+    receivedData = None
+    
+    
+    def __init__(self, ip):
+        self.ip = ip
+        
+        Thread.__init__(self)
+        dispatcher.send('DEBUG', 'SlaveThread', '__init__')
+        self.setupSocket()
+        self.daemon = True
+    
+    def setupSocket(self):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.settimeout(3)
+        
+        if not self.sock:
+            dispatcher.send('ERROR', 'SlaveThread', 'Can\'t open socket in slaveThread')
+    
+    def run(self):
+        dispatcher.send('DEBUG', 'SlaveThread', 'Sending data...')
+        try:
+            self.sock.connect((self.ip, 6678)) # port na sztywno poki co # DEBUG
+     
+            sent = 0
+            while sent < len(self.data):
+                sent += self.sock.send(self.data[sent:])
+            dispatcher.send('DEBUG', 'SlaveThread', 'Data sent...')        
+            
+            self.receivedData = ''
+            while 1:
+                data = self.sock.recv(1024)
+                if not data: break
+                self.receivedData = self.receivedData + data
+        except:
+              dispatcher.send('ERROR', 'SlaveThread', 'Connection to slave %s timed out' % (self.ip))
+              dispatcher.send('CONN_TIMEOUT', 'SlaveThread', self)
+          
+        dispatcher.send('CHAT_FINISHED', 'SlaveThread', self.receivedData)
+            
+      
+        
+    def __del__(self):
+        self.sock.close()
+        
+    
+
+        
+        
+    
+                
+            

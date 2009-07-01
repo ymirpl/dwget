@@ -1,0 +1,44 @@
+'''
+Created on 2009-05-28
+
+@author: wimi
+'''
+from tempfile import NamedTemporaryFile 
+from common.consts import * 
+from common.Logger import Logger 
+from pydispatch import dispatcher 
+
+class fileFragment(): 
+    '''
+    classdocs
+    '''
+    offset = -1 
+    length = -1 
+    file = None  
+    ip = ''
+    done = 0 # status 
+
+    def __init__(self, offset, length = -1, ip = ''): 
+        '''
+        Constructor
+        '''
+        self.offset = offset 
+        self.length = length 
+        self.ip = ip
+        
+        self.file = NamedTemporaryFile(suffix = '.dwgetds') 
+        dispatcher.send('DEBUG', 'fileFragment', 'fileFragment created...') 
+        dispatcher.send('DEBUG', 'fileFragment', 'Created file %s...' % (self.file.name)) 
+        self.done = FF_NEW
+        
+    def getFileFragment(self): 
+        return self.file 
+    
+    def setDone(self):
+        self.done = FF_DONE
+
+    def setRetry(self):
+        self.done = FF_ERROR
+        
+    def isToBeDownloaded(self):
+        return (self.done == FF_ERROR)

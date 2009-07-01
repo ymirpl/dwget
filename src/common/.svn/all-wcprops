@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 29
+/dwget/!svn/ver/90/src/common
+END
+consts.py
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/dwget/!svn/ver/90/src/common/consts.py
+END
+Logger.py
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/dwget/!svn/ver/86/src/common/Logger.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/dwget/!svn/ver/7/src/common/__init__.py
+END
+http.py
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/dwget/!svn/ver/90/src/common/http.py
+END

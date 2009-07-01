@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+
+<title>Distributed wget </title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="/site_media/admin.css" type="text/css" media="screen,projection">
+<script  type="text/javascript" src="/site_media/prototype.js"></script>
+
+</head><body><div id="wrapper">
+<div id="innerwrapper">
+	<div id="header">
+	<h2>Distributed wget</h2>
+	<ul id="nav">
+				<li><a href="/">Zadania</a></li>
+						<li><a href="/manage/list" >Zarządzaj węzłami</a></li>
+	</ul>
+		</div>
+			<div id="content">
+<h2>Zadania</h2>
+
+<table>
+<tbody>
+<tr>
+<th>Adres:</th><th>Rozmiar:</th><th>Status:</th><th>Pobrano:</th><th>Postęp:</th><th>Węzły:</th>
+</tr>
+{% for t in tasks %}
+<tr><td>{{t.0}}</td><td>{{t.1}}</td><td> {{t.2}}</td>
+
+<td>{{t.4}}  </td><td><p style="margin: 0px;">{{t.5}}%</p>
+
+	<p class="progressBar" style="margin: -5px 0 0 0">
+		<span><em style="left:{{t.6}}px">{{t.5}}%</em></span>
+	</p>
+
+
+
+</td>
+
+<td>
+<a href="#" onclick="Element.toggle('sl{{t.0}}'); return false;" >pokaż/ukryj</a> 
+	
+<ul id="sl{{t.0}}" >
+{%  for slave in t.3 %}
+<li class='smallspan'>{{slave.0}}: {{slave.3}}</li>
+{% endfor %}
+</ul>
+</td>
+
+</tr>
+{% endfor %}
+
+ 
+</tbody>
+</table>
+
+
+
+<h2>Węzły</h2>
+
+<table>
+<tbody>
+<tr>
+<th>Adres:</th><th>Plik:</th><th>Status:</th><th>Pobrano:</th><th>Prędkość:</th><th>Średnia prędkość:</th>
+</tr>
+{% for s in slaves %}
+<tr><td>{{s.0}}</td><td>{{s.1}}</td><td> {{s.2}}</td><td>{{s.3}}</td><td>{{s.4}}/s</td><td>{{s.5}}/s</td>
+{% endfor %}
+
+ 
+</tbody>
+</table>
+
+
+
+
+ </br></br>
+
+
+</br></br>
+</br></br>
+
+
+
+
+
+
+</div>
+<div id="footer">
+<p>dwget CC BY-NC Paweł Jastrzębski, Tomasz Kopczuk, Marcin Mincer, Łukasz Tylicki</p>
+</div>
+
+</div></div></body></html>
+
+
